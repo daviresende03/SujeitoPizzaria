@@ -7,7 +7,6 @@ export default function SignIn(){
 
     function handleLogin(){
         alert('EMAIL: ' + email);
-        alert('SENHA: ' + password);
     }
     return (
         <View style={styles.container}>

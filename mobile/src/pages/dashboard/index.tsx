@@ -3,6 +3,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import React, { useState } from "react"
 import {View, Text, SafeAreaView, TouchableOpacity, TextInput, StyleSheet} from 'react-native'
 import { StackParamsList } from "../../routes/app.routes";
+import { api } from "../../services/api";
 
 export default function Dashboard(){
     const navigation = useNavigation<NativeStackNavigationProp<StackParamsList>>();
@@ -12,8 +13,12 @@ export default function Dashboard(){
         if(number === ''){
             return;
         }
-
-        navigation.navigate('Order',{number,order_id: ''});
+        const response = await api.post('/orders',{
+            table: Number(number)
+        })
+        
+        navigation.navigate('Order',{number,order_id: response.data.id});
+        setNumber('');
     }
 
     return (

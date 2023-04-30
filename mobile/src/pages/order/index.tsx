@@ -1,5 +1,5 @@
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {View, Text, StyleSheet, TouchableOpacity, TextInput} from 'react-native'
 import {Feather} from '@expo/vector-icons'
 import { api } from '../../services/api'
@@ -13,9 +13,18 @@ type RouteDetailParams = {
 
 type OrderRouteProps = RouteProp<RouteDetailParams, 'Order'>;
 
+type CategoryProps = {
+    id: string;
+    name: string;
+}
+
 export default function Order(){
     const route = useRoute<OrderRouteProps>();
     const navigate = useNavigation();
+
+    const [categories, setCategories] = useState<CategoryProps[] | []>([]);
+    const [categorySelected, setCategorySelected] = useState<CategoryProps>();
+    const [amount, setAmount] = useState('1');
 
     async function handleCloseOrder(){
         try {
@@ -30,6 +39,15 @@ export default function Order(){
         }
     }
 
+    useEffect(() => {
+        async function loadInfo(){
+            const response = await api.get('/categories');
+            setCategories(response.data);
+            setCategorySelected(response.data[0]);
+        }
+        loadInfo();
+    },[])
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -39,9 +57,13 @@ export default function Order(){
                 </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.input}>
-                <Text style={{color: '#FFF'}}>Pizzas</Text>
-            </TouchableOpacity>
+            {categories.length !== 0 && (
+                <TouchableOpacity style={styles.input}>
+                    <Text style={{color: '#FFF'}}>
+                        {categorySelected?.name}
+                    </Text>
+                </TouchableOpacity>
+            )}
             <TouchableOpacity style={styles.input}>
                 <Text style={{color: '#FFF'}}>Pizza de Calabresa</Text>
             </TouchableOpacity>
@@ -52,7 +74,8 @@ export default function Order(){
                     placeholder='1'
                     placeholderTextColor='#F0F0F0'
                     keyboardType='numeric'
-                    value='1'
+                    value={amount}
+                    onChangeText={(text) => setAmount(text)}
                     style={[styles.input,{width: '60%',textAlign: 'center'}]}
                 />
             </View>

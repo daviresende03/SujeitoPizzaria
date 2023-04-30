@@ -19,14 +19,22 @@ export type CategoryProps = {
     name: string;
 }
 
+type ProductProps = {
+    id: string;
+    name: string;
+}
+
 export default function Order(){
     const route = useRoute<OrderRouteProps>();
     const navigate = useNavigation();
 
     const [categories, setCategories] = useState<CategoryProps[] | []>([]);
-    const [categorySelected, setCategorySelected] = useState<CategoryProps>();
+    const [categorySelected, setCategorySelected] = useState<CategoryProps | undefined>();
     const [amount, setAmount] = useState('1');
     const [modalCategoryVisible, setModalCategoryVisible] = useState(false);
+    const [products, setProducts] = useState<ProductProps[] | []>([]);
+    const [productSelected, setProductSelected] = useState<ProductProps | undefined>();
+    const [modalProductVisible, setModalProductVisible] = useState(false);
 
     async function handleCloseOrder(){
         try {
@@ -54,6 +62,19 @@ export default function Order(){
         loadInfo();
     },[])
 
+    useEffect(() => {
+        async function loadProducts(){
+            const response = await api.get('/products',{
+                params:{
+                    category_id: categorySelected?.id
+                }
+            })
+            setProducts(response.data);
+            setProductSelected(response.data[0]);
+        }
+        loadProducts();
+    },[categorySelected])
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>
@@ -70,10 +91,13 @@ export default function Order(){
                     </Text>
                 </TouchableOpacity>
             )}
-            <TouchableOpacity style={styles.input}>
-                <Text style={{color: '#FFF'}}>Pizza de Calabresa</Text>
-            </TouchableOpacity>
 
+            {products.length !== 0 && (
+                <TouchableOpacity style={styles.input}>
+                    <Text style={{color: '#FFF'}}>{productSelected?.name}</Text>
+                </TouchableOpacity>
+            )}
+            
             <View style={styles.qtContainer}>
                 <Text style={styles.qtText}>Quantidade</Text>
                 <TextInput
